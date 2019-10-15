@@ -1,0 +1,40 @@
+﻿@page "/todo"
+
+@using TodoBlazor.Core.Models
+@using System.Net.Http
+@inject HttpClient Http
+
+<h1>Todo (@todos.Count(todo => !todo.IsDone))</h1>
+
+<ul>
+    @foreach (var todo in todos)
+    {
+        <li>@todo.Title</li>
+    }
+</ul>
+
+<input placeholder="Something todo" @bind="newTodo" />
+<button @onclick="AddTodo">Add todo</button>
+
+@code {
+    private IList<TodoItem> todos = new List<TodoItem>();
+    private string newTodo;
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    todos = await Http.GetJsonAsync<IList<TodoItem>>("api/TodoItems");
+    //}
+
+    protected async Task AddTodo()
+    {
+        if (!string.IsNullOrWhiteSpace(newTodo))
+        {
+            var todo = new TodoItem { Title = newTodo };
+            await Http.PostJsonAsync("api/CreateToDoItem", todo);
+            todos.Add(todo);
+
+            newTodo = string.Empty;
+        }
+    }
+}
+
