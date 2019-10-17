@@ -9,7 +9,10 @@
 <ul>
     @foreach (var todo in todos)
     {
-        <li>@todo.Title</li>
+    <li>
+        @todo.Title
+        <input type="checkbox" @bind="todo.IsDone"/>
+    </li>
     }
 </ul>
 
@@ -17,24 +20,30 @@
 <button @onclick="AddTodo">Add todo</button>
 
 @code {
+    private const string TodoEndpoint = "https://localhost:44398/api/Todo";
     private IList<TodoItem> todos = new List<TodoItem>();
     private string newTodo;
 
-    //protected override async Task OnInitializedAsync()
-    //{
-    //    todos = await Http.GetJsonAsync<IList<TodoItem>>("api/TodoItems");
-    //}
+    protected override async Task OnInitializedAsync()
+    {
+        todos = await Http.GetJsonAsync<IList<TodoItem>>($"{TodoEndpoint}");
+    }
 
     protected async Task AddTodo()
     {
         if (!string.IsNullOrWhiteSpace(newTodo))
         {
             var todo = new TodoItem { Title = newTodo };
-            await Http.PostJsonAsync("api/CreateToDoItem", todo);
+            await Http.PostJsonAsync($"{TodoEndpoint}", todo);
             todos.Add(todo);
 
             newTodo = string.Empty;
         }
     }
-}
 
+    protected async Task EditTodo(long id)
+    {
+        var editItem = todos.Single(i => i.Id == id);
+        await Http.PutJsonAsync($"{TodoEndpoint}", editItem);
+    }
+}
